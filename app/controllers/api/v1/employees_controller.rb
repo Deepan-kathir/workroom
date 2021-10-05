@@ -3,6 +3,7 @@ class Api::V1::EmployeesController < ActionController::API
   # API for getting employee list with working hours
 
   def index
+    # filter based on current month, day and week basis
     dates = if params[:filter_type] == 'weekly'
               { start_date: DateTime.now.beginning_of_week, end_date: DateTime.now.end_of_week }
             elsif params[:filter_type] == 'monthly'
@@ -10,6 +11,11 @@ class Api::V1::EmployeesController < ActionController::API
             elsif params[:filter_type] == 'daily' || params[:filter_type].blank?
               { start_date: Date.today.beginning_of_day, end_date: Date.today.end_of_day }
             end
+
+    # filter based on given date range
+    if params[:filter_start_date].present? && params[:filter_end_date].present?
+      dates = { start_date: params[:filter_start_date].to_datetime, end_date: params[:filter_end_date].to_datetime }
+    end
     order_type = params[:order] == 'high' ? 'Desc' : 'Asc'
 
     employees = Employee.joins(:worksheets)
